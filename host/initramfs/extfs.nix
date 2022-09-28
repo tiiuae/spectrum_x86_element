@@ -14,6 +14,11 @@ let
     # inherit (foot) terminfo;
   };
 
+  usbvm = import ../../vm/sys/usb {
+    inherit pkgs;
+    # inherit (foot) terminfo;
+  };
+
   appvm-catgirl = import ../../vm/app/catgirl {
     inherit config;
     # inherit (foot) terminfo;
@@ -21,6 +26,11 @@ let
 
   appvm-lynx = import ../../vm/app/lynx {
     inherit config;
+    # inherit (foot) terminfo;
+  };
+
+  appvm-usbapp = import ../../vm/app/usbapp {
+    inherit pkgs;
     # inherit (foot) terminfo;
   };
 
