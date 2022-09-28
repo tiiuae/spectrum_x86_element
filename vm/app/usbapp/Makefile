@@ -9,7 +9,9 @@ CLOUD_HYPERVISOR = cloud-hypervisor
 
 VMM = qemu
 
-HOST_FILES = host/data/appvm-usbapp/providers/usb/usbvm
+HOST_FILES = host/data/appvm-usbapp/providers/net/netvm
+
+HOST_DIR =   host/data/appvm-usbapp/providers/usb/ \
 
 HOST_BUILD_FILES = \
 	build/host/data/appvm-usbapp/rootfs.ext4 \
@@ -26,7 +28,7 @@ build/svc: $(HOST_FILES) $(HOST_BUILD_FILES)
 	rm -rf $@
 	mkdir -p $@
 
-	tar -c $(HOST_FILES) | tar -C $@ -x --strip-components 1
+	tar -c $(HOST_FILES) $(HOST_DIR) | tar -C $@ -x --strip-components 1
 	tar -c $(HOST_BUILD_FILES) | tar -C $@ -x --strip-components 2
 
 build/host/data/appvm-usbapp/vmlinux: $(VMLINUX)
@@ -71,8 +73,10 @@ build/rootfs.tar: build/empty $(PACKAGES_TAR) $(VM_FILES) $(VM_BUILD_FILES)
 	done
 
 VM_S6_RC_FILES = \
-	etc/s6-rc/lynx/run \
-	etc/s6-rc/lynx/type \
+	etc/s6-rc/usbstart/run \
+	etc/s6-rc/usbstart/type \
+	etc/s6-rc/appstart/run \
+	etc/s6-rc/appstart/type \
 	etc/s6-rc/mdevd-coldplug/dependencies \
 	etc/s6-rc/mdevd-coldplug/type \
 	etc/s6-rc/mdevd-coldplug/up \

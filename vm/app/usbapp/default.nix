@@ -1,22 +1,22 @@
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2021 Alyssa Ross <hi@alyssa.is>
 
-{ pkgs ? import <nixpkgs> {}
-, terminfo ? pkgs.foot.terminfo
+{ config ? import <nixpkgs> {}
+, terminfo ? config.pkgs.foot.terminfo
 }:
 
-pkgs.pkgsStatic.callPackage (
+config.pkgs.pkgsStatic.callPackage (
 
 { lib, stdenvNoCC, runCommand, writeReferencesToFile, buildPackages
 , s6-rc, tar2ext4
-, busybox, cacert, execline, kmod, lynx, mdevd, s6, s6-linux-init
+, busybox, cacert, execline, kmod,  mdevd, s6, s6-linux-init, usbutils, socat
 }:
 
 let
   inherit (lib) cleanSource cleanSourceWith concatMapStringsSep hasSuffix;
 
   packages = [
-    execline kmod lynx mdevd s6 s6-linux-init s6-rc
+    execline kmod mdevd s6 s6-linux-init s6-rc usbutils socat
 
     (busybox.override {
       extraConfig = ''
@@ -59,6 +59,28 @@ let
       AGP = yes;
     };
   };
+
+
+
+     "usr/bin/usbstart.sh" = {
+      text =
+      ''
+        #!/run/current-system/sw/bin/bash
+ 
+        # Debugging
+        # exec 19>/home/owner/Desktop/startlogfile
+        # BASH_XTRACEFD=19
+        # set -x
+ 
+        echo "Starting USB support"
+
+      '';
+      mode = "0755";
+    };
+
+
+
+
 in
 
 stdenvNoCC.mkDerivation {
