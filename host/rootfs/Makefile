@@ -4,7 +4,7 @@
 # qemu-kvm is non-standard, but is present in at least Fedora and
 # Nixpkgs.  If you don't have qemu-kvm, you'll need to set e.g.
 # QEMU_KVM = qemu-system-x86_64 -enable-kvm.
-QEMU_KVM = qemu-kvm
+QEMU_KVM = qemu-system-x86_64 -enable-kvm
 
 SCRIPTS = ../../scripts
 VERITYSETUP = veritysetup
@@ -19,6 +19,8 @@ build/rootfs.ext4: build/rootfs.tar
 	mv $@.tmp $@
 
 FILES = \
+	etc/dbus-1/system.conf \
+	etc/dbus-1/session.conf \
 	etc/fonts/fonts.conf \
 	etc/fstab \
 	etc/group \
@@ -43,6 +45,9 @@ FILES = \
 	etc/s6-linux-init/scripts/rc.init \
 	etc/xdg/weston/autolaunch \
 	etc/xdg/weston/weston.ini \
+	etc/asound.conf \
+	etc/asound.state \
+	usr/bin/setup.sh \
 	usr/bin/lsvm \
 	usr/bin/vm-console \
 	usr/bin/vm-start \
@@ -51,7 +56,7 @@ DIRS = dev etc/s6-linux-init/env ext run proc sys
 
 # These are separate because they need to be included, but putting
 # them as make dependencies would confuse make.
-LINKS = bin sbin
+LINKS = bin sbin var/run
 
 BUILD_FILES = build/etc/mdev/modalias.sh build/etc/s6-rc
 
@@ -84,6 +89,9 @@ S6_RC_FILES = \
 	etc/s6-rc/card0/up \
 	etc/s6-rc/core/type \
 	etc/s6-rc/core/up \
+	etc/s6-rc/dbus/notification-fd \
+	etc/s6-rc/dbus/run \
+	etc/s6-rc/dbus/type \
 	etc/s6-rc/ext-rc-init/dependencies \
 	etc/s6-rc/ext-rc-init/type \
 	etc/s6-rc/ext-rc-init/up \
@@ -142,22 +150,23 @@ build/rootfs.verity.superblock: build/rootfs.verity
 	tail -n +2 build/rootfs.verity > $@
 
 build/live.img: $(SCRIPTS)/format-uuid.sh $(SCRIPTS)/make-gpt.sh build/rootfs.verity.superblock build/rootfs.verity.roothash build/rootfs.ext4
-	$(SCRIPTS)/make-gpt.sh $@.tmp \
-	    build/rootfs.verity.superblock:2c7357ed-ebd2-46d9-aec1-23d437ec2bf5:$$($(SCRIPTS)/format-uuid.sh "$$(dd if=build/rootfs.verity.roothash bs=32 skip=1 count=1 status=none)") \
-	    build/rootfs.ext4:4f68bce3-e8cd-4db1-96e7-fbcaf984b709:$$($(SCRIPTS)/format-uuid.sh "$$(head -c 32 build/rootfs.verity.roothash)")
+	bash $(SCRIPTS)/make-gpt.sh $@.tmp \
+	    build/rootfs.verity.superblock:2c7357ed-ebd2-46d9-aec1-23d437ec2bf5:$$(bash $(SCRIPTS)/format-uuid.sh "$$(dd if=build/rootfs.verity.roothash bs=32 skip=1 count=1 status=none)") \
+	    build/rootfs.ext4:4f68bce3-e8cd-4db1-96e7-fbcaf984b709:$$(bash $(SCRIPTS)/format-uuid.sh "$$(head -c 32 build/rootfs.verity.roothash)")
 	mv $@.tmp $@
 
 run: build/live.img $(EXT_FS) build/rootfs.verity.roothash
 	$(QEMU_KVM) -cpu host -m 2G \
-	    -machine q35,kernel=$(KERNEL),kernel-irqchip=split,initrd=$(INITRAMFS) \
-	    -display gtk,gl=on \
-	    -qmp unix:vmm.sock,server,nowait \
-	    -monitor vc \
-	    -parallel none \
-	    -drive file=build/live.img,if=virtio,format=raw,readonly=off \
-	    -drive file=$(EXT_FS),if=virtio,format=raw,readonly=on \
-	    -append "console=ttyS0 roothash=$$(< build/rootfs.verity.roothash) ext=/dev/vdb intel_iommu=on" \
-	    -device intel-iommu,intremap=on \
-	    -device virtio-vga-gl \
-	    -device vhost-vsock-pci,guest-cid=3
+	   -enable-kvm \
+	   -cpu host \
+	   -machine q35 \
+	   -m 2G \
+	   -monitor vc \
+	   -parallel none \
+	   -vga virtio -display gtk,gl=on \
+	   -kernel $(KERNEL) \
+	   -initrd $(INITRAMFS) \
+	   -drive file=build/live.img,if=virtio,format=raw,readonly=off \
+	   -drive file=$(EXT_FS),if=virtio,format=raw,readonly=off \
+	   -append "console=ttyS0 roothash=$$(< build/rootfs.verity.roothash) ext=/dev/vdb"
 .PHONY: run

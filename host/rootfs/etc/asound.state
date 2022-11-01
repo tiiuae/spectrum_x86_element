@@ -1,0 +1,138 @@
+state.C920 {
+	control.1 {
+		iface PCM
+		name 'Capture Channel Map'
+		value.0 0
+		value.1 0
+		comment {
+			access read
+			type INTEGER
+			count 2
+			range '0 - 36'
+		}
+	}
+	control.2 {
+		iface MIXER
+		name 'Mic Capture Switch'
+		value true
+		comment {
+			access 'read write'
+			type BOOLEAN
+			count 1
+		}
+	}
+	control.3 {
+		iface MIXER
+		name 'Mic Capture Volume'
+		value 44
+		comment {
+			access 'read write'
+			type INTEGER
+			count 1
+			range '0 - 60'
+			dbmin 2000
+			dbmax 5000
+			dbvalue.0 4200
+		}
+	}
+}
+state.USB {
+	control.1 {
+		iface PCM
+		name 'Capture Channel Map'
+		value.0 0
+		value.1 0
+		comment {
+			access read
+			type INTEGER
+			count 2
+			range '0 - 36'
+		}
+	}
+	control.2 {
+		iface PCM
+		name 'Playback Channel Map'
+		value.0 0
+		value.1 0
+		comment {
+			access read
+			type INTEGER
+			count 2
+			range '0 - 36'
+		}
+	}
+	control.3 {
+		iface MIXER
+		name 'Headset Capture Switch'
+		value true
+		comment {
+			access 'read write'
+			type BOOLEAN
+			count 1
+		}
+	}
+	control.4 {
+		iface MIXER
+		name 'Headset Capture Volume'
+		value 30
+		comment {
+			access 'read write'
+			type INTEGER
+			count 1
+			range '0 - 30'
+			dbmin -3000
+			dbmax 0
+			dbvalue.0 0
+		}
+	}
+	control.5 {
+		iface MIXER
+		name 'Sidetone Playback Switch'
+		value true
+		comment {
+			access 'read write'
+			type BOOLEAN
+			count 1
+		}
+	}
+	control.6 {
+		iface MIXER
+		name 'Sidetone Playback Volume'
+		value 19
+		comment {
+			access 'read write'
+			type INTEGER
+			count 1
+			range '0 - 30'
+			dbmin -5700
+			dbmax -1200
+			dbvalue.0 -2850
+		}
+	}
+	control.7 {
+		iface MIXER
+		name 'Headset Playback Switch'
+		value true
+		comment {
+			access 'read write'
+			type BOOLEAN
+			count 1
+		}
+	}
+	control.8 {
+		iface MIXER
+		name 'Headset Playback Volume'
+		value.0 43
+		value.1 43
+		comment {
+			access 'read write'
+			type INTEGER
+			count 2
+			range '0 - 50'
+			dbmin -5000
+			dbmax 0
+			dbvalue.0 -700
+			dbvalue.1 -700
+		}
+	}
+}
